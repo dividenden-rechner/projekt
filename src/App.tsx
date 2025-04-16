@@ -4,10 +4,8 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App" style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        Dividendenrechner
-      </h1>
+    <div className="App">
+      <h1>Dividendenrechner</h1>
       <DividendenChart />
     </div>
   );
