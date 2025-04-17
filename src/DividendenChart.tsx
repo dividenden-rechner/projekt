@@ -7,7 +7,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LabelList,
   CartesianGrid,
 } from 'recharts';
 
@@ -24,17 +23,29 @@ const DividendenChart: React.FC = () => {
   const [rendite, setRendite] = useState<number>(3.0);
   const [wachstum, setWachstum] = useState<number>(5.0);
   const [investition, setInvestition] = useState<number>(0);
+  const [zeigeTabelle, setZeigeTabelle] = useState<boolean>(false);
 
   const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
-
   let aktuellerDepotwert = depotwert;
+  let verbleibenderFreibetrag = 1000;
+
   const daten: ChartData[] = jahre.map((jahr) => {
     const basis = aktuellerDepotwert * (rendite / 100);
     const brutto = basis * Math.pow(1 + wachstum / 100, jahr - 1);
-    const quellensteuer = brutto * 0.15;
-    const abgeltungsteuer = (brutto - quellensteuer) * 0.26375;
-    const netto = brutto - quellensteuer - abgeltungsteuer;
 
+    const quellensteuer = brutto * 0.15;
+    const nachQuellensteuer = brutto - quellensteuer;
+    const gesamteSteuerLast = 0.26375;
+    const reststeuerSatz = Math.max(0, gesamteSteuerLast - 0.15);
+
+    const steuerfreierBetrag = Math.min(nachQuellensteuer, verbleibenderFreibetrag);
+    const steuerpflichtigerBetrag = nachQuellensteuer - steuerfreierBetrag;
+    const abgeltungsteuer = steuerpflichtigerBetrag * reststeuerSatz;
+
+    verbleibenderFreibetrag -= steuerfreierBetrag;
+    if (verbleibenderFreibetrag < 0) verbleibenderFreibetrag = 0;
+
+    const netto = brutto - quellensteuer - abgeltungsteuer;
     aktuellerDepotwert += investition;
 
     return {
@@ -47,67 +58,79 @@ const DividendenChart: React.FC = () => {
   });
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <h2>Dividendenrechner</h2>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <img src="https://lh6.googleusercontent.com/7P-jPankkM6FkZvJm1bvZB_Zp2G_uEk8bfJXEG8lRb1JYvcl-eyO80Glg3hqztGFFL6mmjTCnl4LyeKAIjWJw6E=w16383" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px' }} />
+        <h2 style={{ fontSize: '1.8rem', margin: 0 }}>www.dividenden-rechner.de</h2>
+      </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <label>Depotwert (€)</label>
-          <input
-            type="number"
-            value={depotwert}
-            onChange={(e) => setDepotwert(parseFloat(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label>Dividendenrendite (%)</label>
-          <input
-            type="number"
-            value={rendite}
-            onChange={(e) => setRendite(parseFloat(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label>Wachstum p.a. (%)</label>
-          <input
-            type="number"
-            value={wachstum}
-            onChange={(e) => setWachstum(parseFloat(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label>Jährliche Investition (€)</label>
-          <input
-            type="number"
-            value={investition}
-            onChange={(e) => setInvestition(parseFloat(e.target.value) || 0)}
-          />
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        {[{
+          label: 'Depotwert (€)', value: depotwert, set: setDepotwert
+        }, {
+          label: 'Dividendenrendite (%)', value: rendite, set: setRendite
+        }, {
+          label: 'Wachstum p.a. (%)', value: wachstum, set: setWachstum
+        }, {
+          label: 'Jährliche Investition (€)', value: investition, set: setInvestition
+        }].map(({ label, value, set }, idx) => (
+          <div key={idx} style={{ display: 'flex', flexDirection: 'column', background: '#f9fafb', borderRadius: '0.5rem', padding: '1rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
+            <label style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{label}</label>
+            <input
+              type="number"
+              value={value}
+              onChange={(e) => set(parseFloat(e.target.value) || 0)}
+              style={{ padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '0.375rem', fontSize: '1rem' }}
+            />
+          </div>
+        ))}
       </div>
 
-      <div style={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={daten}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-            barCategoryGap={20}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="jahr" />
-            <YAxis />
-            <Tooltip formatter={(value: number) => `${value.toLocaleString()} €`} />
-            <Legend />
-            <Bar dataKey="Brutto" stackId="a" fill="#d1d5db">
-              <LabelList dataKey="Brutto" position="top" formatter={(val: number) => `${val} €`} />
-            </Bar>
-            <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" />
-            <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" />
-            <Bar dataKey="Netto" stackId="b" fill="#10b981">
-              <LabelList dataKey="Netto" position="insideTop" formatter={(val: number) => `${val} €`} />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+        <button
+          onClick={() => setZeigeTabelle(!zeigeTabelle)}
+          style={{ padding: '0.5rem 1rem', borderRadius: '6px', backgroundColor: '#10b981', color: 'white', border: 'none', cursor: 'pointer' }}
+        >
+          {zeigeTabelle ? '📊 Diagramm anzeigen' : '📋 Tabelle anzeigen'}
+        </button>
       </div>
+
+      {zeigeTabelle ? (
+        <div style={{ background: '#fff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '0.5rem' }}>Jahr</th>
+                <th style={{ textAlign: 'right', padding: '0.5rem' }}>Netto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {daten.map((d) => (
+                <tr key={d.jahr}>
+                  <td style={{ padding: '0.5rem' }}>{d.jahr}</td>
+                  <td style={{ padding: '0.5rem', textAlign: 'right' }}>{d.Netto.toFixed(2)} €</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div style={{ width: '100%', minHeight: 450, backgroundColor: '#fff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+          <ResponsiveContainer width="100%" height={450}>
+            <BarChart data={daten} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barCategoryGap={10} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="jahr" interval={0} angle={-15} textAnchor="end" height={60} />
+              <YAxis />
+              <Tooltip formatter={(value: number) => `${value.toFixed(2)} €`} />
+              <Legend />
+              <Bar dataKey="Brutto" stackId="a" fill="#d1d5db" barSize={35} />
+              <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" barSize={35} />
+              <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" barSize={35} />
+              <Bar dataKey="Netto" stackId="b" fill="#10b981" barSize={35} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
