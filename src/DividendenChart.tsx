@@ -86,7 +86,7 @@ const DividendenChart: React.FC = () => {
               type="number"
               value={value}
               onChange={(e) => set(parseFloat(e.target.value) || 0)}
-              style={{ padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '0.375rem', fontSize: '1rem', color: '#111827' }}
+              style={{ padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '0.375rem', fontSize: '1rem', color: '#111827', backgroundColor: '#ffffff', outline: 'none' }}
             />
           </div>
         ))}
