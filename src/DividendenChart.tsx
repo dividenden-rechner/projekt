@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
@@ -24,6 +24,12 @@ const DividendenChart: React.FC = () => {
   const [wachstum, setWachstum] = useState<number>(5.0);
   const [investition, setInvestition] = useState<number>(0);
   const [zeigeTabelle, setZeigeTabelle] = useState<boolean>(false);
+
+  useEffect(() => {
+    document.body.style.backgroundColor = '#f4f4f4';
+    document.body.style.color = '#111827';
+    document.body.style.fontFamily = 'sans-serif';
+  }, []);
 
   const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
   let aktuellerDepotwert = depotwert;
@@ -74,13 +80,13 @@ const DividendenChart: React.FC = () => {
         }, {
           label: 'Jährliche Investition (€)', value: investition, set: setInvestition
         }].map(({ label, value, set }, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', background: '#f9fafb', borderRadius: '0.5rem', padding: '1rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
-            <label style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{label}</label>
+          <div key={idx} style={{ display: 'flex', flexDirection: 'column', background: '#ffffff', borderRadius: '0.5rem', padding: '1rem', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
+            <label style={{ fontWeight: 600, marginBottom: '0.5rem', color: '#111827' }}>{label}</label>
             <input
               type="number"
               value={value}
               onChange={(e) => set(parseFloat(e.target.value) || 0)}
-              style={{ padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '0.375rem', fontSize: '1rem' }}
+              style={{ padding: '0.6rem 0.8rem', border: '1px solid #ccc', borderRadius: '0.375rem', fontSize: '1rem', color: '#111827' }}
             />
           </div>
         ))}
@@ -96,8 +102,8 @@ const DividendenChart: React.FC = () => {
       </div>
 
       {zeigeTabelle ? (
-        <div style={{ background: '#fff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+        <div style={{ background: '#ffffff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', color: '#111827' }}>
             <thead>
               <tr>
                 <th style={{ textAlign: 'left', padding: '0.5rem' }}>Jahr</th>
@@ -115,7 +121,7 @@ const DividendenChart: React.FC = () => {
           </table>
         </div>
       ) : (
-        <div style={{ width: '100%', minHeight: 450, backgroundColor: '#fff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+        <div style={{ width: '100%', minHeight: 450, backgroundColor: '#ffffff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
           <ResponsiveContainer width="100%" height={450}>
             <BarChart data={daten} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barCategoryGap={10} barGap={2}>
               <CartesianGrid strokeDasharray="3 3" />
