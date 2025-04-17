@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -9,25 +9,33 @@ import {
   ResponsiveContainer,
   LabelList,
   CartesianGrid,
-} from "recharts";
+} from 'recharts';
 
-const DividendenChart = () => {
-  const [depotwert, setDepotwert] = useState(50000);
-  const [rendite, setRendite] = useState(3.0);
-  const [wachstum, setWachstum] = useState(5.0);
-  const [investition, setInvestition] = useState(0);
+interface ChartData {
+  jahr: string;
+  Brutto: number;
+  Quellensteuer: number;
+  Abgeltungsteuer: number;
+  Netto: number;
+}
+
+const DividendenChart: React.FC = () => {
+  const [depotwert, setDepotwert] = useState<number>(50000);
+  const [rendite, setRendite] = useState<number>(3.0);
+  const [wachstum, setWachstum] = useState<number>(5.0);
+  const [investition, setInvestition] = useState<number>(0);
 
   const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
 
   let aktuellerDepotwert = depotwert;
-  const daten = jahre.map((jahr) => {
+  const daten: ChartData[] = jahre.map((jahr) => {
     const basis = aktuellerDepotwert * (rendite / 100);
     const brutto = basis * Math.pow(1 + wachstum / 100, jahr - 1);
     const quellensteuer = brutto * 0.15;
     const abgeltungsteuer = (brutto - quellensteuer) * 0.26375;
     const netto = brutto - quellensteuer - abgeltungsteuer;
 
-    aktuellerDepotwert += investition; // Jährlich investieren
+    aktuellerDepotwert += investition;
 
     return {
       jahr: `Jahr ${jahr}`,
@@ -39,47 +47,45 @@ const DividendenChart = () => {
   });
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+      <h2>Dividendenrechner</h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <div>
-          <label className="block text-sm font-medium mb-1">Depotwert (€)</label>
+          <label>Depotwert (€)</label>
           <input
             type="number"
-            className="w-full border rounded px-3 py-2"
             value={depotwert}
-            onChange={(e) => setDepotwert(parseFloat(e.target.value))}
+            onChange={(e) => setDepotwert(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Dividendenrendite (%)</label>
+          <label>Dividendenrendite (%)</label>
           <input
             type="number"
-            className="w-full border rounded px-3 py-2"
             value={rendite}
-            onChange={(e) => setRendite(parseFloat(e.target.value))}
+            onChange={(e) => setRendite(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Wachstum p.a. (%)</label>
+          <label>Wachstum p.a. (%)</label>
           <input
             type="number"
-            className="w-full border rounded px-3 py-2"
             value={wachstum}
-            onChange={(e) => setWachstum(parseFloat(e.target.value))}
+            onChange={(e) => setWachstum(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Jährliche Investition (€)</label>
+          <label>Jährliche Investition (€)</label>
           <input
             type="number"
-            className="w-full border rounded px-3 py-2"
             value={investition}
-            onChange={(e) => setInvestition(parseFloat(e.target.value))}
+            onChange={(e) => setInvestition(parseFloat(e.target.value) || 0)}
           />
         </div>
       </div>
 
-      <div className="w-full h-[400px]">
+      <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={daten}
@@ -89,20 +95,15 @@ const DividendenChart = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="jahr" />
             <YAxis />
-            <Tooltip formatter={(value) => `${value.toLocaleString()} €`} />
+            <Tooltip formatter={(value: number) => `${value.toLocaleString()} €`} />
             <Legend />
-            <defs>
-              <filter id="shadow" height="130%">
-                <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="#999" />
-              </filter>
-            </defs>
-            <Bar dataKey="Brutto" stackId="a" fill="#d1d5db" radius={[8, 8, 0, 0]} filter="url(#shadow)">
-              <LabelList dataKey="Brutto" position="top" formatter={(val) => `${val} €`} />
+            <Bar dataKey="Brutto" stackId="a" fill="#d1d5db">
+              <LabelList dataKey="Brutto" position="top" formatter={(val: number) => `${val} €`} />
             </Bar>
-            <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" radius={[8, 8, 0, 0]} filter="url(#shadow)" />
-            <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} filter="url(#shadow)" />
-            <Bar dataKey="Netto" stackId="b" fill="#10b981" radius={[8, 8, 0, 0]} filter="url(#shadow)">
-              <LabelList dataKey="Netto" position="insideTop" formatter={(val) => `${val} €`} />
+            <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" />
+            <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" />
+            <Bar dataKey="Netto" stackId="b" fill="#10b981">
+              <LabelList dataKey="Netto" position="insideTop" formatter={(val: number) => `${val} €`} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
