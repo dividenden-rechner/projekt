@@ -1,4 +1,3 @@
-import React from 'react';
 import DividendenChart from './DividendenChart';
 import './App.css';
 
