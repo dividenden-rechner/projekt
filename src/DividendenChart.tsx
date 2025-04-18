@@ -22,6 +22,7 @@ interface ChartData {
 }
 
 const quellensteuerSatzByLand: Record<string, number> = {
+  Indien: 0.20,
   Deutschland: 0.0,
   USA: 0.15,
   Schweiz: 0.35,
@@ -76,8 +77,7 @@ const DividendenChart: React.FC = () => {
 
   const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
   let aktuellerDepotwert = depotwert;
-  let verbleibenderFreibetrag = freibetragIgnorieren ? 0 : 1000;
-
+  
   const quellensteuerSatz = expertenmodus ? (quellensteuerSatzByLand[herkunftsland] ?? 0.15) : (usQuellensteuer ? 0.15 : 0);
 
   const daten: ChartData[] = jahre.map((jahr) => {
