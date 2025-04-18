@@ -5,7 +5,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-
   Legend,
   ResponsiveContainer,
   CartesianGrid,
@@ -22,13 +21,46 @@ interface ChartData {
   jahrNummer: number;
 }
 
+const quellensteuerSatzByLand: Record<string, number> = {
+  Deutschland: 0.0,
+  USA: 0.15,
+  Schweiz: 0.35,
+  Frankreich: 0.30,
+  Dänemark: 0.27,
+  Kanada: 0.25,
+  Italien: 0.26,
+  Spanien: 0.19,
+  China: 0.10,
+  Hongkong: 0.0,
+  Indonesien: 0.20,
+  Singapur: 0.0,
+  Japan: 0.15,
+  Südkorea: 0.22,
+  Österreich: 0.27,
+  Niederlande: 0.15,
+  Australien: 0.0,
+  Großbritannien: 0.0,
+  Finnland: 0.30,
+  Schweden: 0.30,
+  Norwegen: 0.25,
+  Belgien: 0.30,
+  Luxemburg: 0.15,
+  Irland: 0.20,
+  Polen: 0.19
+};
+
 const DividendenChart: React.FC = () => {
+  const [beruecksichtigeAbgeltungsteuer, setBeruecksichtigeAbgeltungsteuer] = useState<boolean>(true);
+  const [usQuellensteuer, setUsQuellensteuer] = useState<boolean>(true);
   const [depotwert, setDepotwert] = useState<number>(50000);
   const [rendite, setRendite] = useState<number>(3.0);
   const [wachstum, setWachstum] = useState<number>(5.0);
   const [investition, setInvestition] = useState<number>(0);
   const [zeigeTabelle, setZeigeTabelle] = useState<boolean>(false);
   const [reinvestiereNetto, setReinvestiereNetto] = useState<boolean>(false);
+  const [freibetragIgnorieren, setFreibetragIgnorieren] = useState<boolean>(false);
+  const [expertenmodus, setExpertenmodus] = useState<boolean>(false);
+  const [herkunftsland, setHerkunftsland] = useState<string>('USA');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
@@ -44,23 +76,35 @@ const DividendenChart: React.FC = () => {
 
   const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
   let aktuellerDepotwert = depotwert;
-  let verbleibenderFreibetrag = 1000;
+  let verbleibenderFreibetrag = freibetragIgnorieren ? 0 : 1000;
+
+  const quellensteuerSatz = expertenmodus ? (quellensteuerSatzByLand[herkunftsland] ?? 0.15) : (usQuellensteuer ? 0.15 : 0);
 
   const daten: ChartData[] = jahre.map((jahr) => {
     const basis = aktuellerDepotwert * (rendite / 100);
     const brutto = basis * Math.pow(1 + wachstum / 100, jahr - 1);
 
-    const quellensteuer = brutto * 0.15;
+    const quellensteuer = brutto * quellensteuerSatz;
     const nachQuellensteuer = brutto - quellensteuer;
-    const gesamteSteuerLast = brutto >= 1000 ? 0.26375 : 0;
-    const reststeuerSatz = Math.max(0, gesamteSteuerLast - 0.15);
+    const gesamteSteuerLast = 0.26375;
 
-    const steuerfreierBetrag = Math.min(nachQuellensteuer, verbleibenderFreibetrag);
-    const steuerpflichtigerBetrag = nachQuellensteuer - steuerfreierBetrag;
-    const abgeltungsteuer = steuerpflichtigerBetrag * reststeuerSatz;
+    let steuerpflichtigerBetrag = 0;
+if (!freibetragIgnorieren) {
+  const steuerfreierBetrag = Math.min(nachQuellensteuer, 1000);
+  steuerpflichtigerBetrag = nachQuellensteuer - steuerfreierBetrag;
+} else {
+  steuerpflichtigerBetrag = nachQuellensteuer;
+}
 
-    verbleibenderFreibetrag -= steuerfreierBetrag;
-    if (verbleibenderFreibetrag < 0) verbleibenderFreibetrag = 0;
+    const abgeltungsteuer = (() => {
+      if (!beruecksichtigeAbgeltungsteuer && !expertenmodus) return 0;
+      if (expertenmodus) {
+        const grenze = 1000;
+        const abzugBerechnet = Math.max(0, nachQuellensteuer - grenze);
+        return abzugBerechnet * gesamteSteuerLast;
+      }
+      return steuerpflichtigerBetrag > 0 ? steuerpflichtigerBetrag * gesamteSteuerLast : 0;
+    })();
 
     const netto = brutto - quellensteuer - abgeltungsteuer;
     const nurBrutto = brutto;
@@ -109,6 +153,8 @@ const DividendenChart: React.FC = () => {
         </button>
       </header>
 
+      <p style={{ marginBottom: '2rem', textAlign: 'center' }}>Berechne deine Nettodividenden – inkl. Quellensteuer und Abgeltungsteuer. Wähle bei Bedarf ein Herkunftsland aus und aktiviere den Expertenmodus.</p>
+
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem', justifyContent: 'center', textAlign: 'center' }}>
         <label>
           Depotwert (€):<br />
@@ -128,31 +174,52 @@ const DividendenChart: React.FC = () => {
         </label>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
-          <input
-            type="checkbox"
-            checked={reinvestiereNetto}
-            onChange={() => setReinvestiereNetto(!reinvestiereNetto)}
-          />
-          Netto-Dividenden automatisch reinvestieren
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input type="checkbox" checked={reinvestiereNetto} onChange={() => setReinvestiereNetto(!reinvestiereNetto)} />
+          Netto-Dividenden reinvestieren
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
-          <input
-            type="checkbox"
-            checked={zeigeTabelle}
-            onChange={() => setZeigeTabelle(!zeigeTabelle)}
-          />
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input type="checkbox" checked={zeigeTabelle} onChange={() => setZeigeTabelle(!zeigeTabelle)} />
           Tabelle anzeigen
         </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input type="checkbox" checked={freibetragIgnorieren} onChange={() => setFreibetragIgnorieren(!freibetragIgnorieren)} />
+          Steuerfreibetrag an/aus
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input type="checkbox" checked={expertenmodus} onChange={() => setExpertenmodus(!expertenmodus)} />
+          Expertenmodus aktivieren
+        </label>
+        {!expertenmodus && (
+          <>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="checkbox" checked={usQuellensteuer} onChange={() => setUsQuellensteuer(!usQuellensteuer)} />
+              US-Quellensteuer berücksichtigen
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="checkbox" checked={beruecksichtigeAbgeltungsteuer} onChange={() => setBeruecksichtigeAbgeltungsteuer(!beruecksichtigeAbgeltungsteuer)} />
+              Abgeltungsteuer berücksichtigen
+            </label>
+          </>
+        )}
+        {expertenmodus && (
+          <label>
+            Herkunftsland:<br />
+            <select value={herkunftsland} onChange={e => setHerkunftsland(e.target.value)} style={{ padding: '0.5rem' }}>
+              {Object.entries(quellensteuerSatzByLand).sort(([a], [b]) => a.localeCompare(b)).map(([land, satz]) => (
+                <option key={land} value={land}>{`${land} (${(satz * 100).toFixed(0)} %)`}</option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
-
-      <div style={{ width: '100%', minHeight: 450, backgroundColor: isDarkMode ? '#374151' : '#ffffff', borderRadius: '0.75rem', padding: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-        <ResponsiveContainer width="100%" height={450}>
-          <BarChart data={daten} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barCategoryGap={10} barGap={2}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#4b5563' : '#d1d5db'} />
-            <XAxis dataKey="jahrNummer" interval={0} angle={0} textAnchor="middle" height={40} stroke={isDarkMode ? '#e5e7eb' : '#111827'} />
-            <YAxis stroke={isDarkMode ? '#e5e7eb' : '#111827'} />
+    <div style={{ width: '100%', height: 400 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={daten} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="jahrNummer" />
+            <YAxis />
             <Tooltip
               formatter={(value: number, name: string) => {
                 const monthly = value / 12;
@@ -168,17 +235,17 @@ const DividendenChart: React.FC = () => {
               }}
               contentStyle={{ backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', borderColor: isDarkMode ? '#4b5563' : '#ccc', color: isDarkMode ? '#f9fafb' : '#111827' }}
             />
-            <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#111827' }} />
-            <Bar dataKey="Brutto" stackId="a" fill="#d1d5db" barSize={35} />
-            <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" barSize={35} />
-            <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" barSize={35} />
-            <Bar dataKey="Netto" stackId="b" fill="#10b981" barSize={35} />
+            <Legend />
+            <Bar dataKey="Brutto" stackId="a" fill="#8884d8" />
+            <Bar dataKey="Quellensteuer" stackId="a" fill="#f59e0b" />
+            <Bar dataKey="Abgeltungsteuer" stackId="a" fill="#ef4444" />
+            <Bar dataKey="Netto" stackId="b" fill="#10b981" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {zeigeTabelle && (
-        <table style={{ width: '100%', marginTop: '2rem', overflowX: 'auto', display: 'block', borderCollapse: 'collapse', backgroundColor: isDarkMode ? '#1f2937' : '#fff', color: isDarkMode ? '#f9fafb' : '#111827', minWidth: '700px' }}>
+        <table style={{ width: '100%', marginTop: '2rem', borderCollapse: 'collapse', backgroundColor: isDarkMode ? '#1f2937' : '#fff', color: isDarkMode ? '#f9fafb' : '#111827', minWidth: '700px' }}>
           <thead>
             <tr>
               <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Jahr</th>
