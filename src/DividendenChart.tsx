@@ -108,7 +108,26 @@ const DividendenChart: React.FC = () => {
         </button>
       </header>
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <label>
+          Depotwert (€):<br />
+          <input type="number" value={depotwert} onChange={e => setDepotwert(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+        </label>
+        <label>
+          Dividendenrendite (%):<br />
+          <input type="number" value={rendite} onChange={e => setRendite(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+        </label>
+        <label>
+          Dividendenwachstum (%):<br />
+          <input type="number" value={wachstum} onChange={e => setWachstum(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+        </label>
+        <label>
+          Jährliche Investition (€):<br />
+          <input type="number" value={investition} onChange={e => setInvestition(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
           <input
             type="checkbox"
@@ -116,6 +135,14 @@ const DividendenChart: React.FC = () => {
             onChange={() => setReinvestiereNetto(!reinvestiereNetto)}
           />
           Netto-Dividenden automatisch reinvestieren
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
+          <input
+            type="checkbox"
+            checked={zeigeTabelle}
+            onChange={() => setZeigeTabelle(!zeigeTabelle)}
+          />
+          Tabelle anzeigen
         </label>
       </div>
 
@@ -148,6 +175,31 @@ const DividendenChart: React.FC = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {zeigeTabelle && (
+        <table style={{ width: '100%', marginTop: '2rem', borderCollapse: 'collapse', backgroundColor: isDarkMode ? '#1f2937' : '#fff', color: isDarkMode ? '#f9fafb' : '#111827' }}>
+          <thead>
+            <tr>
+              <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Jahr</th>
+              <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Brutto</th>
+              <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Quellensteuer</th>
+              <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Abgeltungsteuer</th>
+              <th style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>Netto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {daten.map((d, index) => (
+              <tr key={index}>
+                <td style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>{d.jahr}</td>
+                <td style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>{d.Brutto.toLocaleString('de-DE')} €</td>
+                <td style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>{d.Quellensteuer.toLocaleString('de-DE')} €</td>
+                <td style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>{d.Abgeltungsteuer.toLocaleString('de-DE')} €</td>
+                <td style={{ padding: '0.5rem', borderBottom: '1px solid #ccc' }}>{d.Netto.toLocaleString('de-DE')} €</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
