@@ -111,19 +111,19 @@ const DividendenChart: React.FC = () => {
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
         <label>
           Depotwert (€):<br />
-          <input type="number" value={depotwert} onChange={e => setDepotwert(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+          <input type="number" value={depotwert} onChange={e => setDepotwert(parseFloat(e.target.value))} style={{ padding: '0.6rem 0.8rem', borderRadius: '0.5rem', border: '1px solid #ccc', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', outline: 'none', transition: 'all 0.2s ease-in-out' }} />
         </label>
         <label>
           Dividendenrendite (%):<br />
-          <input type="number" value={rendite} onChange={e => setRendite(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+          <input type="number" value={rendite} onChange={e => setRendite(parseFloat(e.target.value))} style={{ padding: '0.6rem 0.8rem', borderRadius: '0.5rem', border: '1px solid #ccc', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', outline: 'none', transition: 'all 0.2s ease-in-out' }} />
         </label>
         <label>
           Dividendenwachstum (%):<br />
-          <input type="number" value={wachstum} onChange={e => setWachstum(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+          <input type="number" value={wachstum} onChange={e => setWachstum(parseFloat(e.target.value))} style={{ padding: '0.6rem 0.8rem', borderRadius: '0.5rem', border: '1px solid #ccc', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', outline: 'none', transition: 'all 0.2s ease-in-out' }} />
         </label>
         <label>
           Jährliche Investition (€):<br />
-          <input type="number" value={investition} onChange={e => setInvestition(parseFloat(e.target.value))} style={{ padding: '0.4rem', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff' }} />
+          <input type="number" value={investition} onChange={e => setInvestition(parseFloat(e.target.value))} style={{ padding: '0.6rem 0.8rem', borderRadius: '0.5rem', border: '1px solid #ccc', color: isDarkMode ? '#111827' : '#111827', backgroundColor: isDarkMode ? '#f9fafb' : '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', outline: 'none', transition: 'all 0.2s ease-in-out' }} />
         </label>
       </div>
 
