@@ -85,7 +85,7 @@ const DividendenChart: React.FC = () => {
   });
 
   return (
-    <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', zoom: '0.85' }}>
+    <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
         <img
           src="https://lh6.googleusercontent.com/7P-jPankkM6FkZvJm1bvZB_Zp2G_uEk8bfJXEG8lRb1JYvcl-eyO80Glg3hqztGFFL6mmjTCnl4LyeKAIjWJw6E=w16383"
