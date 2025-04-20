@@ -75,7 +75,7 @@ const DividendenChart: React.FC = () => {
     document.body.style.color = isDarkMode ? '#f9fafb' : '#111827';
   }, [isDarkMode]);
 
-  const jahre = Array.from({ length: 10 }, (_, i) => i + 1);
+  const jahre = Array.from({ length: 30 }, (_, i) => i + 1);
   let aktuellerDepotwert = depotwert;
   
   const quellensteuerSatz = expertenmodus ? (quellensteuerSatzByLand[herkunftsland] ?? 0.15) : (usQuellensteuer ? 0.15 : 0);
